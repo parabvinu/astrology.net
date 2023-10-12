@@ -1,0 +1,235 @@
+﻿
+
+<script src="~/Scripts/planetpos.js"></script>
+<script src="~/Scripts/sprintf.js"></script>
+<script src="~/Scripts/jquery-3.7.1.min.js"></script>
+<script src="~/Scripts/astrochart.js"></script>
+@*<script src="~/Scripts/swisseph.js"></script>*@
+<script src="~/Scripts/bootstrap.min.js"></script>
+<div class="jumbotron">
+    <form action="Home/generate" method="post">
+        <table class="table table-responsive">
+            <tr>
+                <td>
+                    <label for="first-name">Name</label>
+                </td>
+                <td>
+                    <input type="text" name="name" id="name" required>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="birthdate">Birth Date</label>
+                </td>
+                <td>
+                    <input type="date" name="birthdate" id="birthdate" required><br />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="btime">Birth time:</label>
+                </td>
+                <td>
+                    <input type="time" id="btime" name="btime">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="birthdate">Birth Place</label>
+                </td>
+                <td>
+                    <input type="text" name="place" id="place" required onblur="latitude();">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="lat">Latitude</label>
+                </td>
+                <td>
+                    <input type="text" name="lat" id="lat" readonly>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="lon">Longitude</label>
+                </td>
+                <td>
+                    <input type="text" name="lon" id="lon" readonly>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="tzone">TimeZone</label>
+                </td>
+                <td>
+                    <input type="text" name="tzone" id="tzone" readonly>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button type="button" onclick="showchart();" value="See Chart">showpose</button>
+                </td>
+                <td>
+                    <input type="reset" id="resetButton" value="Reset all info" tabindex="-1">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <input type="text" name="latdeg" id="latdeg">
+    <input type="text" name="latmin" id="latmin">
+    <input type="text" name="londeg" id="londeg">
+    <input type="text" name="lonmin" id="lonmin">
+
+    <input type="text" name="year" id="year">
+    <input type="text" name="month" id="month">
+    <input type="text" name="day" id="day">
+
+    <input type="text" name="hour" id="hour">
+    <input type="text" name="min" id="min">
+    <input type="text" name="sec" id="sec">
+
+</div>
+<div id="data">
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Planet</td>
+                <td>Nakshtra</td>
+                <td>Pad</td>
+                <td>Degree</td>
+                <td>Nakshtra Lord</td>
+                <td>Rashi</td>
+            </tr>
+        </thead>
+        @for (var i = 0; i < 12; i++)
+        {
+            <tr>
+                <td>@ViewBag.Planet[i]</td>
+                <td>@ViewBag.Nakshtra[i]</td>
+                <td>@ViewBag.Pada[i]</td>
+                <td>@ViewBag.Degree[i]</td>
+                <td>@ViewBag.NakLord[i]</td>
+                <td>@ViewBag.Rashi[i]</td>
+            </tr>
+        }
+    </table>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+@*<script src="https://cdn.jsdelivr.net/npm/swisseph"></script>*@
+
+<script type="text/javascript" language="javascript">
+   /* swisseph.swe_set_ephe_path("~/Scripts/swisseph.js");*/
+
+    var date = { year: 2023, month: 7, day: 26, hour: 12 };
+    //var julday = swisseph.swe_julday(date.year, date.month, date.day, date.hour, swisseph.SE_GREG_CAL);
+    //var planet = swisseph.SE_MERCURY;
+    //var iflag = swisseph.SEFLG_SPEED;
+    //var result = swisseph.swe_calc_ut(julday, planet, iflag);
+    //var longitude = result.longitude;
+    //var latitude = result.latitude;
+    //var distance = result.distance;
+
+
+    function latitude() {
+        var date = new Date();
+        const offset = date.getTimezoneOffset();
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.getElementById("tzone").value = offset;
+
+        var a = document.getElementById("place").value;
+        var url = "https://geocode.maps.co/search?q=" + a;
+
+        var request = new XMLHttpRequest();
+        // Instantiating the request object
+        request.open("GET", url);
+
+        // Defining event listener for readystatechange event
+        request.onreadystatechange = function () {
+            // Check if the request is compete and was successful
+            if (this.readyState === 4 && this.status === 200) {
+                // Inserting the response from server into an HTML element
+                var c = this.responseText.split(':');
+                //console.log(this.responseText);
+                var latitude = c[10].substring(1, 11);
+                var longitude = c[11].substring(1, 11);
+
+                var latdeg = c[10].substring(1, 3);
+                var latmin = c[10].substring(4, 6);
+
+                var londeg = c[11].substring(1, 3);
+                var lonmin = c[11].substring(4, 6);
+
+                document.getElementById("latdeg").value = c[10].substring(1, 3);
+                document.getElementById("latmin").value = c[10].substring(4, 6);
+                document.getElementById("londeg").value = c[11].substring(1, 3);
+                document.getElementById("lonmin").value = c[11].substring(4, 6);
+
+                //test(latdeg, latmin, londeg, lonmin);
+
+                document.getElementById("lat").value = latitude;
+                document.getElementById("lon").value = longitude;
+                //var b = this.responseText[lon];
+
+
+                var birthdate = document.getElementById("birthdate").value;
+                var dateParts = birthdate.split("-");
+
+                document.getElementById("year").value = parseInt(dateParts[0]);
+                document.getElementById("month").value = parseInt(dateParts[1]);
+                document.getElementById("day").value = parseInt(dateParts[2]);
+
+                var timestamp = new Date(btime);
+                var btime = document.getElementById("btime").value;
+
+                var time = convertTime12to24(btime);
+                arr = time.split(':');
+                document.getElementById("hour").value = $.trim(arr[0]);
+                document.getElementById("min").value = $.trim(arr[1]);
+                document.getElementById("sec").value = $.trim(arr[1]);
+                compute();
+
+                //var offset = new Date(timestamp).getTimezoneOffset();
+                //document.getElementById("tzone").value = offset;
+
+                //var planetPosition = new Array();
+                ////planetPosition = calPlanetPosition2(year, month, day, hour, minute, longitude, latitude);
+
+                //var starLord = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
+                //var starLordIndex = [0, 1, 3, 2, 4, 6, 5, 7, 8];
+                //var planetStarLord = new Array();
+                //for (var i = 0; i < 9; i++) {
+                //    var planetDegree = planetPosition[i + 1];
+                //    var starLordDegree = planetDegree / 13.33333333;
+                //    var starLordIndex = Math.floor(starLordDegree);
+                //    planetStarLord[i] = starLord[starLordIndex];
+                //}
+            }
+        };
+
+        // Sending the request to the server
+        request.send();
+    }
+
+    const convertTime12to24 = (time12h) => {
+        const [time, modifier] = time12h.split(' ');
+
+        let [hours, minutes] = time.split(':');
+
+        if (hours === '12') {
+            hours = '00';
+        }
+
+        if (modifier === 'PM') {
+            hours = parseInt(hours, 10) + 12;
+        }
+
+        return `${hours}:${minutes}`;
+    }
+
+
+
+
+
+
+</script>

@@ -1,0 +1,27 @@
+﻿@{
+   
+}
+
+
+<p>Use this area to provide additional information.</p>
+<div id="data">
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Planet</td>
+                <td>Nakshtra</td>
+                <td>Pad</td>
+                <td>Degree</td>
+            </tr>
+        </thead>
+        @for (int i = 0; i < 12; i++)
+        {
+            <tr>
+                <td>@ViewBag.Planet[i]</td>
+                <td>@ViewBag.Nakshtra[i]</td>
+                <td>@ViewBag.Pada[i]</td>
+                <td>@ViewBag.Degree[i]</td>
+            </tr>
+        }
+    </table>
+</div>
