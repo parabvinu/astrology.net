@@ -7,7 +7,7 @@ using SwissEphNet;
 using CosineKitty;
 using TA;
 
-
+//for reference try this java code https://github.com/bmatthew1/Ephemeris-Examples/blob/master/VedicHouses/VedicHouses.java
 namespace webapp.Controllers
 {
     public class HomeController : Controller
