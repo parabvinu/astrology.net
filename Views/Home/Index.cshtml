@@ -1,4 +1,4 @@
-﻿
+
 
 <script src="~/Scripts/planetpos.js"></script>
 <script src="~/Scripts/sprintf.js"></script>
@@ -99,6 +99,7 @@
                 <td>Degree</td>
                 <td>Nakshtra Lord</td>
                 <td>Rashi</td>
+                <td>Retrogade</td>
             </tr>
         </thead>
         @for (var i = 0; i < 12; i++)
@@ -110,8 +111,26 @@
                 <td>@ViewBag.Degree[i]</td>
                 <td>@ViewBag.NakLord[i]</td>
                 <td>@ViewBag.Rashi[i]</td>
+                <td>@ViewBag.Retro[i]</td>
             </tr>
         }
+    </table>
+    
+    <table class="table">
+        <tr>
+            <td>House Name</td>
+           <td>Cusp Degree</td>
+        </tr>
+        @{var j = 0;}
+        @foreach(var c in ViewBag.Cusps)
+            {
+            <tr>
+                <td>@j</td>
+                <td>@c</td>
+            </tr>
+            @(j++);
+            
+            }
     </table>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
