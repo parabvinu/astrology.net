@@ -7,16 +7,25 @@ using SwissEphNet;
 using CosineKitty;
 using TA;
 
-//for reference try this java code https://github.com/bmatthew1/Ephemeris-Examples/blob/master/VedicHouses/VedicHouses.java
+
 namespace webapp.Controllers
 {
     public class HomeController : Controller
     {
-      
+      public string dtodms(double degree)
+        {
+           
+            int degrees = (int)degree;
+            int deg = degrees % 30;
+           double minutes = (degree - degrees) * 60;
+            double seconds = Math.Truncate((minutes - (int)minutes) * 60);
+            string dms = string.Format("{0}°{1}'{2}\"", deg, (int)minutes, seconds.ToString("F2"));
+            return dms;
+        }
         public ActionResult Index()
         {
             SwissEph sweph = new SwissEph();
-            sweph.swe_set_sid_mode(1,  0,  0);
+            sweph.swe_set_sid_mode(5,  0,  0);
             // ViewBag.path = sweph.swe_get_library_path();
             DateTime currentDate = DateTime.UtcNow; // Use UTC time to avoid time zone issues
             int year = DateTime.UtcNow.Year;
@@ -26,8 +35,8 @@ namespace webapp.Controllers
             int min = DateTime.UtcNow.Minute;
             int sec = DateTime.UtcNow.Second;
             double secs = DateTime.UtcNow.Second;
-            double latitude = 19.0760;
-            double longitude = 72.8777;
+            double latitude = 19.0060 + 17 / 60.0;
+            double longitude = 72.4877 + 5 / 60.0;
             string estwest = (longitude > 0 ? "E" : "W");
             string northsouth = (latitude > 0 ? "N" : "S");
             double[] cusps = new double[13];
@@ -39,9 +48,15 @@ namespace webapp.Controllers
             double hrs = hour + (min / 60) + (secs / 3600);
             double jdt = sweph.swe_julday(year,  month,  day, hrs, 1);
             double ayanut = sweph.swe_get_ayanamsa_ut(jdt);
-
+            string[] dms = new string[13];
             int flags1 = 65536;
             int results = sweph.swe_houses(jdt, latitude, longitude,  'P',  cusps,  ascmc);
+            for(int p = 0; p < 13; p++)
+            {
+                dms[p] = dtodms(cusps[p]);
+            }
+           
+           
             flags1 = 2|65536|64|256;
 
             
@@ -60,9 +75,10 @@ namespace webapp.Controllers
             int[] sublords = new int[12];
 
             string[] rashi = {"मेष","वृषभ","मिथुन","कर्क","सिंह","कन्या","तूळ","वृश्चिक","धनु","मकर","कुंभ","मीन"};
+            ViewBag.Sign = rashi[(int)(ascmc[0] / 30)];
             int[] pad = new int[12];
             int nIndx = 0;
-            double[] degree = new double[12];
+            string[] degree = new string[12];
             string serr = string.Empty;
             double[] positions = new double[23];
             string[] retro = new string[23];
@@ -101,9 +117,9 @@ namespace webapp.Controllers
                     nIndx = (int)((positions[0]) / 13.33333);
                     nakshatra[i] = nakshatras[nIndx];
                     pad[i] = (int)(positions[0] % 4) + 1;
-                    degree[i] = (positions[0]%30);
+                    degree[i] = dtodms(positions[0]);
                     lord[i] = nklord[nIndx % 9];
-                    pos = (int)(Math.Ceiling(positions[0] / 30));
+                    pos = (int)(positions[0] / 30);
                     rashi[i] = rashi[pos];
                     if (positions[3] < 0)
                     {
@@ -121,15 +137,14 @@ namespace webapp.Controllers
                 //nIndx = (int)(positions[0] / 13.33333333);
                 nIndx = (int)((positions[0])/13.33333);
                 nakshatra[i] = nakshatras[nIndx];
-                pad[i] = (int)(positions[0] % 4) + 1;
-                degree[i] = (positions[0]%30 );
+                pad[i] = (int)(positions[0] % 4)+1 ;
+                degree[i] = dtodms(positions[0]);
                 lord[i] = nklord[nIndx % 9];
                 pos =  (int)(positions[0] / 30);
                 rashi[i] = rashi[pos];
                 if (positions[3] < 0)
                 {
                     retro[i] = "R";
-
                 }
                 else
                 {
@@ -153,6 +168,8 @@ namespace webapp.Controllers
                 //ViewBag.Subloard = sublords;
                 ViewBag.Cusps = cusps;
                 ViewBag.Retro = retro;
+                ViewBag.Cusps = dms;
+                ViewBag.Asc = ascmc[0];
             }
             else
             {
